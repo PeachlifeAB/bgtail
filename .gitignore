@@ -1,0 +1,9 @@
+# Test artifacts specific to this project
+test-debug.log
+test-run.log
+
+# AgentSensei working directory (bgtail logs, etc.)
+.agentsensei/
+__pycache__/
+*.egg-info/
+.worktrees/
