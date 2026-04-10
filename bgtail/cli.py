@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Literal
 
 
-_BASE_VERSION = "2.0.1"
+_BASE_VERSION = "0.1.0"
 
 
 LogMode = Literal["default", "project", "global"]
