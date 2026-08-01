@@ -1,0 +1,45 @@
+version: "3"
+
+vars:
+  # The Homebrew tap that publishes bgtail. Override TAP_REPO if your checkout
+  # lives elsewhere.
+  TAP_REPO: '{{.TAP_REPO | default (printf "%s/Developer/owner/PeachlifeAB/homebrew-tap" .HOME)}}'
+
+tasks:
+  default:
+    cmd: task --list
+    silent: true
+
+  fmt:
+    desc: Verify Python formatting.
+    cmd: ruff format --check .
+
+  lint:
+    desc: Run Ruff lint checks.
+    cmd: ruff check .
+
+  typecheck:
+    desc: Type-check the product package.
+    cmd: mypy bgtail
+
+  tests:
+    desc: Run the project test suite.
+    cmd: pytest tests/
+
+  test:
+    desc: Run every local quality gate.
+    cmds:
+      - task: fmt
+      - task: lint
+      - task: typecheck
+      - task: tests
+
+  "release:preflight":
+    desc: Study current release state and gate the release. Run before every release.
+    cmd: |
+      if [ ! -x "{{.TAP_REPO}}/bin/preflight" ]; then
+        echo "preflight unavailable: {{.TAP_REPO}}/bin/preflight not found" >&2
+        echo "clone https://github.com/PeachlifeAB/homebrew-tap or set TAP_REPO" >&2
+        exit 2
+      fi
+      "{{.TAP_REPO}}/bin/preflight" bgtail
