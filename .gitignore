@@ -7,3 +7,9 @@ test-run.log
 __pycache__/
 *.egg-info/
 .worktrees/
+/.dog
+/.gemini
+/AGENTS.md
+/CLAUDE.md
+/build
+/openspec

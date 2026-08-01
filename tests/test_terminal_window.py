@@ -13,7 +13,7 @@ class RunResult:
 
 
 def test_open_terminal_tail_returns_window_and_tty(monkeypatch, tmp_path: Path) -> None:
-    import bgtail.cli as cli
+    from bgtail import cli
 
     monkeypatch.delenv("NO_WINDOW", raising=False)
     monkeypatch.delenv("SSH_CLIENT", raising=False)
@@ -22,7 +22,7 @@ def test_open_terminal_tail_returns_window_and_tty(monkeypatch, tmp_path: Path) 
 
     calls: list[list[str]] = []
 
-    def fake_run(argv, **kwargs):  # noqa: ANN001
+    def fake_run(argv, **kwargs):
         calls.append(list(argv))
         return RunResult(stdout="0|17279|/dev/ttys007\n")
 
@@ -39,11 +39,11 @@ def test_open_terminal_tail_returns_window_and_tty(monkeypatch, tmp_path: Path) 
 
 
 def test_close_window_uses_terminal_ui_close(monkeypatch) -> None:
-    import bgtail.cli as cli
+    from bgtail import cli
 
     calls: list[list[str]] = []
 
-    def fake_run(argv, **kwargs):  # noqa: ANN001
+    def fake_run(argv, **kwargs):
         calls.append(list(argv))
         return RunResult()
 

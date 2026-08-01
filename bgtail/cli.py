@@ -14,7 +14,6 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
 
-
 _BASE_VERSION = "0.1.0"
 
 

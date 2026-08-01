@@ -7,7 +7,7 @@ class PopenSpy:
     def __init__(self) -> None:
         self.calls: list[list[str]] = []
 
-    def __call__(self, argv, **kwargs):  # noqa: ANN001
+    def __call__(self, argv, **kwargs):
         # Capture argv exactly as passed.
         self.calls.append(list(argv))
 
@@ -24,7 +24,7 @@ def test_passthrough_preserves_argv_simple(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("NO_WINDOW", "1")
 
-    import bgtail.cli as cli
+    from bgtail import cli
 
     spy = PopenSpy()
     monkeypatch.setattr(cli.subprocess, "Popen", spy)
@@ -51,7 +51,7 @@ def test_passthrough_preserves_argv_simple(monkeypatch, tmp_path):
     "argv",
     [
         ["python3", "-c", "print('a b')"],
-        ["python3", "-c", "print(\"a b\")"],
+        ["python3", "-c", 'print("a b")'],
         ["printf", "%s\\n", "a b"],
         ["echo", "x|y"],
         ["echo", "x&&y"],
@@ -64,7 +64,7 @@ def test_passthrough_does_not_split_special_chars(monkeypatch, tmp_path, argv):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("NO_WINDOW", "1")
 
-    import bgtail.cli as cli
+    from bgtail import cli
 
     spy = PopenSpy()
     monkeypatch.setattr(cli.subprocess, "Popen", spy)
@@ -83,7 +83,7 @@ def test_passthrough_allows_leading_double_dash_sentinel(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("NO_WINDOW", "1")
 
-    import bgtail.cli as cli
+    from bgtail import cli
 
     spy = PopenSpy()
     monkeypatch.setattr(cli.subprocess, "Popen", spy)
@@ -102,7 +102,7 @@ def test_passthrough_runner_mode_forwards_exactly(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("NO_WINDOW", "1")
 
-    import bgtail.cli as cli
+    from bgtail import cli
 
     spy = PopenSpy()
     monkeypatch.setattr(cli.subprocess, "Popen", spy)

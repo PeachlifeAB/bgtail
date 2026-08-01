@@ -9,7 +9,7 @@ class PopenSpy:
     def __init__(self) -> None:
         self.calls: list[list[str]] = []
 
-    def __call__(self, argv, **kwargs):  # noqa: ANN001
+    def __call__(self, argv, **kwargs):
         self.calls.append(list(argv))
 
         class Proc:
@@ -31,7 +31,7 @@ def test_passthrough_forwards_project_log_flag(monkeypatch, tmp_path: Path) -> N
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("NO_WINDOW", "1")
 
-    import bgtail.cli as cli
+    from bgtail import cli
 
     spy = PopenSpy()
     monkeypatch.setattr(cli.subprocess, "Popen", spy)
@@ -52,7 +52,7 @@ def test_passthrough_forwards_global_log_flag(monkeypatch, tmp_path: Path) -> No
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("NO_WINDOW", "1")
 
-    import bgtail.cli as cli
+    from bgtail import cli
 
     spy = PopenSpy()
     monkeypatch.setattr(cli.subprocess, "Popen", spy)

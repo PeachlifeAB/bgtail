@@ -6,7 +6,7 @@ from bgtail.cli import main
 
 
 def test_reconnect_does_not_open_terminal_window(monkeypatch, tmp_path: Path) -> None:
-    import bgtail.cli as cli
+    from bgtail import cli
 
     monkeypatch.chdir(tmp_path)
     log_path = tmp_path / "session.log"
@@ -18,10 +18,9 @@ def test_reconnect_does_not_open_terminal_window(monkeypatch, tmp_path: Path) ->
 
     opened = False
 
-    def fake_open_terminal_tail(path: Path):  # noqa: ANN001
+    def fake_open_terminal_tail(path: Path):
         nonlocal opened
         opened = True
-        return None
 
     monkeypatch.setattr(cli, "_resolve_log_path", lambda job_id, log_mode: (log_path, "default"))
     monkeypatch.setattr(cli, "_open_terminal_tail", fake_open_terminal_tail)
