@@ -21,7 +21,7 @@ uv tool install git+https://github.com/PeachlifeAB/bgtail.git@0.1.0
 ### Start a job
 
 ```bash
-bgtail [--project-log|--global-log] <command> [args...]
+bgtail [--project-log|--global-log] [--stdin=inherit] <command> [args...]
 ```
 
 - Default log dir: `./log/bgtail/`
@@ -42,6 +42,7 @@ Reconnect resolves the log path for the given ID and prints dots (if still runni
 
 - `--project-log` - Store logs under `./log/bgtail/` explicitly
 - `--global-log` - Store logs under `/tmp/<CallerDirBasename>/`
+- `--stdin=inherit` - Pass the caller's stdin through the detached runner to the target command. The caller owns the descriptor: closing it delivers EOF to the target, and bgtail does not retain it, synthesize input, or keep it open after caller or terminal disconnect. The default is closed stdin (`DEVNULL`).
 
 ## Help
 

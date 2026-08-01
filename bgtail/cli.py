@@ -18,6 +18,7 @@ _BASE_VERSION = "0.1.0"
 
 
 LogMode = Literal["default", "project", "global"]
+StdinPolicy = Literal["closed", "inherit"]
 
 
 @dataclass(frozen=True)
@@ -335,7 +336,12 @@ def _wait_for_exit_file(job_id: str, log_mode: LogMode) -> int:
         time.sleep(8)
 
 
-def _runner(job_id: str, log_mode: LogMode, cmd_argv: list[str]) -> int:
+def _runner(
+    job_id: str,
+    log_mode: LogMode,
+    cmd_argv: list[str],
+    stdin_policy: StdinPolicy = "closed",
+) -> int:
     log_path = _log_path(job_id, log_mode)
     log_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -347,7 +353,7 @@ def _runner(job_id: str, log_mode: LogMode, cmd_argv: list[str]) -> int:
                     cmd_argv,
                     stdout=log_fh,
                     stderr=subprocess.STDOUT,
-                    stdin=subprocess.DEVNULL,
+                    stdin=None if stdin_policy == "inherit" else subprocess.DEVNULL,
                     start_new_session=True,
                     close_fds=True,
                 )
@@ -374,8 +380,13 @@ def _runner(job_id: str, log_mode: LogMode, cmd_argv: list[str]) -> int:
     return exit_code
 
 
-def _spawn_runner(job_id: str, log_mode: LogMode, cmd_argv: list[str]) -> None:
-    runner_argv = [sys.executable, "-m", "bgtail.cli"]
+def _spawn_runner(
+    job_id: str,
+    log_mode: LogMode,
+    cmd_argv: list[str],
+    stdin_policy: StdinPolicy,
+) -> None:
+    runner_argv = [sys.executable, "-m", "bgtail.cli", f"--stdin={stdin_policy}"]
     if log_mode == "project":
         runner_argv.append("--project-log")
     elif log_mode == "global":
@@ -385,7 +396,7 @@ def _spawn_runner(job_id: str, log_mode: LogMode, cmd_argv: list[str]) -> None:
 
     subprocess.Popen(
         runner_argv,
-        stdin=subprocess.DEVNULL,
+        stdin=None if stdin_policy == "inherit" else subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         start_new_session=True,
@@ -464,6 +475,9 @@ def main(argv: list[str]) -> int:
     log_group.add_argument("--global-log", action="store_true")
     parser.add_argument("--reconnect")
     parser.add_argument("--no-log-popup", action="store_true")
+    parser.add_argument(
+        "--stdin", choices=("closed", "inherit"), default="closed", dest="stdin_policy"
+    )
     parser.add_argument("--_runner", action="store_true")
     parser.add_argument("rest", nargs=argparse.REMAINDER)
 
@@ -481,10 +495,14 @@ def main(argv: list[str]) -> int:
         print("    bgtail --project-log <command> [args...]")
         print("    bgtail --global-log <command> [args...]")
         print("    bgtail --no-log-popup <command> [args...]")
+        print("    bgtail --stdin=inherit <command> [args...]")
         print("    bgtail --reconnect <ID>")
         print("    bgtail kill <ID>")
         print("    bgtail --version")
         print("    bgtail --help")
+        print()
+        print("--stdin=inherit passes the caller's stdin to the detached job.")
+        print("The caller owns stdin; closing it delivers EOF to the target.")
         return 0
 
     log_mode: LogMode = "default"
@@ -492,6 +510,8 @@ def main(argv: list[str]) -> int:
         log_mode = "project"
     elif ns.global_log:
         log_mode = "global"
+
+    stdin_policy: StdinPolicy = ns.stdin_policy
 
     if ns._runner:
         if not ns.rest:
@@ -502,7 +522,7 @@ def main(argv: list[str]) -> int:
             rest = rest[1:]
         if not rest:
             return 1
-        return _runner(job_id, log_mode, rest)
+        return _runner(job_id, log_mode, rest, stdin_policy)
 
     if ns.reconnect:
         job_id = ns.reconnect
@@ -538,7 +558,7 @@ def main(argv: list[str]) -> int:
     job_id = _make_id()
     log_path = _log_path(job_id, log_mode)
 
-    _spawn_runner(job_id, log_mode, cmd_argv)
+    _spawn_runner(job_id, log_mode, cmd_argv, stdin_policy)
 
     window_id = _open_terminal_tail(
         log_path, exit_file=_exit_path(job_id, log_mode), no_window=ns.no_log_popup
