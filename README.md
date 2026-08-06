@@ -13,7 +13,7 @@ uv tool install -e .
 ### Release tag install
 
 ```bash
-uv tool install git+https://github.com/PeachlifeAB/bgtail.git@0.1.0
+uv tool install git+https://github.com/PeachlifeAB/bgtail.git@0.1.1
 ```
 
 ## Usage
